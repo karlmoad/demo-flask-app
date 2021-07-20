@@ -4,7 +4,7 @@ import time
 
 class Process:
     def __init__(self):
-        self._thread = threading.Thread(target=self.run)
+        self._thread = None
         self._lock = threading.Lock()
         self._active = False
         self._counter = 0
@@ -18,6 +18,7 @@ class Process:
 
     def begin(self):
         with self._lock:
+            self._setup()
             self._active = True
         self._thread.start()
         return {"message": "Processing Thread Started"}
@@ -25,6 +26,10 @@ class Process:
     def isAlive(self):
         with self._lock:
             return {"active": self._active}
+
+    def _setup(self):
+        if self._thread is None:
+            self._thread = threading.Thread(target=self.run)
 
     def _check(self):
         with self._lock:
@@ -35,6 +40,7 @@ class Process:
             self._active = False
         print("Stopping")
         self._thread.join()
+        self._thread = None
         return {"message": "Processing Thread Stopped"}
 
     def _increment(self):
